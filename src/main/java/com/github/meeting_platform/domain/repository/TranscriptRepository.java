@@ -10,5 +10,5 @@ import com.github.meeting_platform.domain.model.Transcript;
 public interface TranscriptRepository extends JpaRepository<Transcript, UUID> {
     Optional<Transcript> findById(UUID id);
     <S extends Transcript> S save(S transcript);
-    Iterable<Transcript> findByMeetingIdAndSessionIdOrderedBySequenceNumber(UUID meetingId, UUID sessionId);
+    Iterable<Transcript> findByMeetingIdAndSessionIdOrderBySequenceNumberAsc(UUID meetingId, UUID sessionId);
 }

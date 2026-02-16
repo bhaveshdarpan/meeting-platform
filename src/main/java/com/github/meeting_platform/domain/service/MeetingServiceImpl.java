@@ -54,8 +54,10 @@ public class MeetingServiceImpl implements MeetingService {
             Duration startOffset, Duration endOffset, String language) {
         if (meetingRepository.findById(meetingId).isEmpty()) {
             throw new IllegalArgumentException("Meeting not found: " + meetingId);
-        } else if (sessionRepository.findActiveByMeetingId(meetingId).isEmpty()) {
-            throw new IllegalArgumentException("Active session not found for meeting: " + meetingId);
+        } else if (sessionRepository.findById(sessionId).isEmpty()) {
+            throw new IllegalArgumentException("Session not found: " + sessionId);
+        } else if (sessionRepository.findById(sessionId).get().getMeetingId() != meetingId) {
+            throw new IllegalArgumentException("Session " + sessionId + " does not belong to meeting " + meetingId);
         } else if (transcriptRepository.findById(transcriptId).isPresent()) {
             throw new IllegalArgumentException("Transcript already exists: " + transcriptId);
         }
@@ -66,9 +68,14 @@ public class MeetingServiceImpl implements MeetingService {
 
     @Override
     public void endMeeting(UUID meetingId, UUID sessionId, Instant endedAt, String reason) {
-        System.out.println("Ending meeting: " + meetingId + ", session: " + sessionId);
-        if (sessionRepository.findById(sessionId).isEmpty()) {
+        if (meetingRepository.findById(meetingId).isEmpty()) {
+            throw new IllegalArgumentException("Meeting not found: " + meetingId);
+        } else if (sessionRepository.findById(sessionId).isEmpty()) {
             throw new IllegalArgumentException("Session not found: " + sessionId);
+        } else if (sessionRepository.findById(sessionId).get().getMeetingId() != meetingId) {
+            throw new IllegalArgumentException("Session " + sessionId + " does not belong to meeting " + meetingId);
+        } else if (sessionRepository.findById(sessionId).get().getEndedAt() != null) {
+            throw new IllegalArgumentException("Session already ended: " + sessionId);
         }
         Session session = sessionRepository.findById(sessionId).get();
         session.end(endedAt, reason);
@@ -81,11 +88,13 @@ public class MeetingServiceImpl implements MeetingService {
             throw new IllegalArgumentException("Meeting not found: " + meetingId);
         } else if (sessionRepository.findById(sessionId).isEmpty()) {
             throw new IllegalArgumentException("Session not found: " + sessionId);
+        } else if (sessionRepository.findById(sessionId).get().getMeetingId() != meetingId) {
+            throw new IllegalArgumentException("Session " + sessionId + " does not belong to meeting " + meetingId);
         }
         // Fetch and return transcripts for the given meeting and session in the order
         // of sequence number
         return StreamSupport
-                .stream(transcriptRepository.findByMeetingIdAndSessionIdOrderedBySequenceNumber(meetingId, sessionId)
+                .stream(transcriptRepository.findByMeetingIdAndSessionIdOrderBySequenceNumberAsc(meetingId, sessionId)
                         .spliterator(), false)
                 .toList();
     }
