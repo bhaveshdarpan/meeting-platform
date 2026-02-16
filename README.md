@@ -1,4 +1,4 @@
-# meeting-webhook-service
+# Meeting Webook Application
 
 Brief service that implements the meeting platform webhook handling and related application logic.
 
