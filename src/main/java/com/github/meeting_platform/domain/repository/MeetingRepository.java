@@ -7,8 +7,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.github.meeting_platform.domain.model.Meeting;
 
-public interface MeetingRepository extends JpaRepository<Meeting, UUID> {
-    Optional<Meeting> findById(UUID id);
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
-    <S extends Meeting> S save(S meeting);
+public interface MeetingRepository extends JpaRepository<Meeting, UUID> {
+    Optional<Meeting> findById(@NotNull UUID id);
+
+    <S extends Meeting> S save(@NotNull @Valid S meeting);
 }

@@ -1,0 +1,650 @@
+{
+	"info": {
+		"_postman_id": "meeting-platform-api",
+		"name": "Meeting Platform API",
+		"description": "Postman collection for testing the Meeting Platform Webhook Service",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/webhooks/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"webhooks",
+						"health"
+					]
+				},
+				"description": "Health check endpoint to verify service is running"
+			},
+			"response": []
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "Meeting Started",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"pm.test(\"Response has status accepted\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"accepted\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.started\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\",\n    \"title\": \"Q4 Planning Sync\",\n    \"roomName\": \"lcfvaa-absxch\",\n    \"status\": \"LIVE\",\n    \"createdAt\": \"2024-12-13T06:57:09.736Z\",\n    \"startedAt\": \"2024-12-13T06:57:09.736Z\",\n    \"organizedBy\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    }\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Start a new meeting session"
+					},
+					"response": []
+				},
+				{
+					"name": "Meeting Transcript - Chunk 1",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\"\n  },\n  \"data\": {\n    \"transcriptId\": \"{{$randomUUID}}\",\n    \"sequenceNumber\": 1,\n    \"speaker\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    },\n    \"content\": \"Alright, let us get started with the Q4 planning.\",\n    \"startOffset\": 2,\n    \"endOffset\": 5,\n    \"language\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Send first transcript chunk"
+					},
+					"response": []
+				},
+				{
+					"name": "Meeting Transcript - Chunk 2",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\"\n  },\n  \"data\": {\n    \"transcriptId\": \"{{$randomUUID}}\",\n    \"sequenceNumber\": 2,\n    \"speaker\": {\n      \"id\": \"{{$randomUUID}}\",\n      \"name\": \"Bob Smith\"\n    },\n    \"content\": \"Sure. I have the revenue projections ready to share.\",\n    \"startOffset\": 6,\n    \"endOffset\": 9,\n    \"language\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Send second transcript chunk"
+					},
+					"response": []
+				},
+				{
+					"name": "Meeting Transcript - Chunk 3",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\"\n  },\n  \"data\": {\n    \"transcriptId\": \"{{$randomUUID}}\",\n    \"sequenceNumber\": 3,\n    \"speaker\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    },\n    \"content\": \"Great, go ahead and walk us through the numbers.\",\n    \"startOffset\": 10,\n    \"endOffset\": 13,\n    \"language\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Send third transcript chunk"
+					},
+					"response": []
+				},
+				{
+					"name": "Meeting Ended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.ended\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\",\n    \"title\": \"Q4 Planning Sync\",\n    \"status\": \"LIVE\",\n    \"createdAt\": \"2024-12-13T06:57:09.736Z\",\n    \"startedAt\": \"2024-12-13T06:57:09.736Z\",\n    \"endedAt\": \"2024-12-13T07:04:37.052Z\",\n    \"organizedBy\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    }\n  },\n  \"reason\": \"HOST_ENDED_MEETING\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "End the meeting session"
+					},
+					"response": []
+				}
+			],
+			"description": "Webhook endpoints for meeting lifecycle events"
+		},
+		{
+			"name": "Edge Cases",
+			"item": [
+				{
+					"name": "Duplicate Transcript (Idempotency Test)",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"duplicateTranscriptId\", pm.variables.replaceIn(\"{{$randomUUID}}\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\"\n  },\n  \"data\": {\n    \"transcriptId\": \"{{duplicateTranscriptId}}\",\n    \"sequenceNumber\": 1,\n    \"speaker\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    },\n    \"content\": \"Duplicate test message\",\n    \"startOffset\": 2,\n    \"endOffset\": 5,\n    \"language\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Send duplicate transcript to test idempotency. Run this request twice with the same transcriptId."
+					},
+					"response": []
+				},
+				{
+					"name": "Transcript After Session Ended",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 202\", function () {",
+									"    pm.response.to.have.status(202);",
+									"});",
+									"",
+									"pm.test(\"Transcript saved after meeting ended (late delivery)\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql(\"accepted\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\",\n    \"sessionId\": \"{{sessionId}}\"\n  },\n  \"data\": {\n    \"transcriptId\": \"{{$randomUUID}}\",\n    \"sequenceNumber\": 99,\n    \"speaker\": {\n      \"id\": \"{{organizerId}}\",\n      \"name\": \"Alice Johnson\"\n    },\n    \"content\": \"Late transcript - saved even after session ended\",\n    \"startOffset\": 1000,\n    \"endOffset\": 1003,\n    \"language\": \"en\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Add transcript after session has ended. Should be accepted (202) - late delivery supported."
+					},
+					"response": []
+				},
+				{
+					"name": "Invalid Event Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"unknown.event\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Test with invalid event type. Should return 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "Missing Required Fields",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"event\": \"meeting.transcript\",\n  \"meeting\": {\n    \"id\": \"{{meetingId}}\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/webhooks",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"webhooks"
+							]
+						},
+						"description": "Test with missing required fields. Should return 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "Out of Order Transcript Delivery",
+					"item": [
+						{
+							"name": "1. Meeting Started",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.started\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\",\"title\":\"Out of Order Test\",\"roomName\":\"test-room\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "2. Transcript Chunk 3 (arrives first)",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":3,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"Third message (delivered first)\",\"startOffset\":10,\"endOffset\":13,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "3. Transcript Chunk 1 (arrives second)",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":1,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"First message (delivered second)\",\"startOffset\":2,\"endOffset\":5,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "4. Transcript Chunk 2 (arrives third)",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":2,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"Second message (delivered third)\",\"startOffset\":6,\"endOffset\":9,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "5. Meeting Ended",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.ended\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\",\"title\":\"Out of Order Test\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"endedAt\":\"2024-12-13T07:04:37.052Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}},\"reason\":\"HOST_ENDED_MEETING\"}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						}
+					],
+					"description": "Simulate out-of-order transcript delivery (3, 1, 2). Use Get Session Transcript to verify ordering."
+				},
+				{
+					"name": "Concurrent Sessions",
+					"item": [
+						{
+							"name": "1. Start Session A",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.started\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionIdA}}\",\"title\":\"Concurrent Test\",\"roomName\":\"room\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "2. Start Session B",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.started\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionIdB}}\",\"title\":\"Concurrent Test\",\"roomName\":\"room\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "3. Transcript to Session A",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionIdA}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":1,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"Transcript for Session A\",\"startOffset\":1,\"endOffset\":2,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "4. Transcript to Session B",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionIdB}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":1,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"Transcript for Session B\",\"startOffset\":1,\"endOffset\":2,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						}
+					],
+					"event": [{"listen":"prerequest","script":{"exec":["if (!pm.environment.get('sessionIdA')) pm.environment.set('sessionIdA', pm.variables.replaceIn('{{$randomUUID}}'));","if (!pm.environment.get('sessionIdB')) pm.environment.set('sessionIdB', pm.variables.replaceIn('{{$randomUUID}}'));"],"type":"text/javascript"}}],
+					"description": "Test concurrent sessions for same meeting. sessionIdA and sessionIdB are set in prerequest."
+				},
+				{
+					"name": "Duplicate Meeting Started",
+					"event": [{"listen":"test","script":{"exec":["pm.test(\"Status code is 202 (idempotent)\", function () { pm.response.to.have.status(202); });"],"type":"text/javascript"}}],
+					"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.started\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\",\"title\":\"Duplicate Test\",\"roomName\":\"test-room\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]},"description":"Send meeting.started twice with same meetingId/sessionId. Should return 202 both times (idempotent)."},
+					"response": []
+				},
+				{
+					"name": "Large Transcript Payload",
+					"item": [
+						{
+							"name": "1. Meeting Started",
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.started\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\",\"title\":\"Large Payload Test\",\"roomName\":\"test-room\",\"status\":\"LIVE\",\"createdAt\":\"2024-12-13T06:57:09.736Z\",\"startedAt\":\"2024-12-13T06:57:09.736Z\",\"organizedBy\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"}}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]}}
+						},
+						{
+							"name": "2. Large Transcript (~50KB)",
+							"event": [{"listen":"prerequest","script":{"exec":["var largeContent = 'A'.repeat(50000); pm.environment.set('largeTranscriptContent', largeContent);"],"type":"text/javascript"}},{"listen":"test","script":{"exec":["pm.test(\"Status code is 202\", function () { pm.response.to.have.status(202); });"],"type":"text/javascript"}}],
+							"request": {"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"body":{"mode":"raw","raw":"{\"event\":\"meeting.transcript\",\"meeting\":{\"id\":\"{{meetingId}}\",\"sessionId\":\"{{sessionId}}\"},\"data\":{\"transcriptId\":\"{{$randomUUID}}\",\"sequenceNumber\":1,\"speaker\":{\"id\":\"{{organizerId}}\",\"name\":\"Alice Johnson\"},\"content\":\"{{largeTranscriptContent}}\",\"startOffset\":1,\"endOffset\":2,\"language\":\"en\"}}"},"url":{"raw":"{{baseUrl}}/api/webhooks","host":["{{baseUrl}}"],"path":["api","webhooks"]},"description":"Test large transcript content (~50KB). Should be accepted. Content over 512KB returns 400."},
+							"response": []
+						}
+					],
+					"description": "Test large transcript payload. Run folder to create meeting then send ~50KB content."
+				}
+			],
+			"description": "Edge case scenarios for error handling, idempotency, out-of-order delivery, concurrent sessions, and large payloads"
+		},
+		{
+			"name": "Transcript Retrieval",
+			"item": [
+				{
+					"name": "Get Session Transcript",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response is an array\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.be.an('array');",
+									"});",
+									"",
+									"pm.test(\"Transcripts are ordered by sequenceNumber\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    if (jsonData.length > 1) {",
+									"        for (var i = 1; i < jsonData.length; i++) {",
+									"            pm.expect(jsonData[i].sequenceNumber).to.be.at.least(jsonData[i-1].sequenceNumber);",
+									"        }",
+									"    }",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/meetings/{{meetingId}}/sessions/{{sessionId}}/transcript",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"meetings",
+								"{{meetingId}}",
+								"sessions",
+								"{{sessionId}}",
+								"transcript"
+							]
+						},
+						"description": "Retrieve ordered transcript for a session"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Transcript - Non-existent Meeting",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400 or 404\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([400, 404]);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/meetings/00000000-0000-0000-0000-000000000000/sessions/00000000-0000-0000-0000-000000000000/transcript",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"meetings",
+								"00000000-0000-0000-0000-000000000000",
+								"sessions",
+								"00000000-0000-0000-0000-000000000000",
+								"transcript"
+							]
+						},
+						"description": "Test error handling for non-existent meeting/session"
+					},
+					"response": []
+				}
+			],
+			"description": "Endpoints for retrieving transcripts"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Set default variables if not already set",
+					"if (!pm.environment.get('baseUrl')) {",
+					"    pm.environment.set('baseUrl', 'http://localhost:8080');",
+					"}",
+					"",
+					"if (!pm.environment.get('meetingId')) {",
+					"    pm.environment.set('meetingId', pm.variables.replaceIn('{{$randomUUID}}'));",
+					"}",
+					"",
+					"if (!pm.environment.get('sessionId')) {",
+					"    pm.environment.set('sessionId', pm.variables.replaceIn('{{$randomUUID}}'));",
+					"}",
+					"",
+					"if (!pm.environment.get('organizerId')) {",
+					"    pm.environment.set('organizerId', pm.variables.replaceIn('{{$randomUUID}}'));",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "meetingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "sessionId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "organizerId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

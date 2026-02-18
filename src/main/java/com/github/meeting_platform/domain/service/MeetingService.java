@@ -1,34 +1,20 @@
 package com.github.meeting_platform.domain.service;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
 import com.github.meeting_platform.domain.model.Transcript;
+import com.github.meeting_platform.domain.service.command.AddTranscriptCommand;
+import com.github.meeting_platform.domain.service.command.EndMeetingCommand;
+import com.github.meeting_platform.domain.service.command.StartMeetingCommand;
 
 public interface MeetingService {
 
-        void startMeeting(UUID meetingId, UUID sessionId, String title, String roomName, UUID organizedById,
-                        String organizedByName, String createdAt, String startedAt);
+    void startMeeting(StartMeetingCommand command);
 
-        void addTranscript(
-                        UUID meetingId,
-                        UUID sessionId,
-                        UUID transcriptId,
-                        int sequenceNumber,
-                        UUID speakerId,
-                        String speakerName,
-                        String content,
-                        Duration startOffset,
-                        Duration endOffset,
-                        String language);
+    void addTranscript(AddTranscriptCommand command);
 
-        void endMeeting(
-                        UUID meetingId,
-                        UUID sessionId,
-                        Instant endedAt,
-                        String reason);
+    void endMeeting(EndMeetingCommand command);
 
-        List<Transcript> getSessionTranscripts(UUID meetingId, UUID sessionId);
+    List<Transcript> getSessionTranscripts(UUID meetingId, UUID sessionId);
 }

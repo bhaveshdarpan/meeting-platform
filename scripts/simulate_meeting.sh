@@ -7,7 +7,9 @@
  
 BASE_URL="${1:-http://localhost:8080}"
 WEBHOOK_URL="$BASE_URL/api/webhooks"
- 
+
+uuid_gen() { uuidgen 2>/dev/null || powershell -NoProfile -Command "[guid]::NewGuid().ToString()"; }
+
 MEETING_ID="50c8940e-1b97-402a-97d6-2708b7feca41"
 SESSION_ID="05e57591-d89e-45c9-ae44-08dc1eaad0e0"
 ORGANIZER_ID="70c5d391-5bca-4cf3-9907-bec205798adb"
@@ -46,12 +48,12 @@ CONTENTS=(
   "Sure. I have the revenue projections ready to share."
   "Great, go ahead and walk us through the numbers."
 )
-START_OFFSETS=("00:00:02.100" "00:00:05.800" "00:00:09.400")
-END_OFFSETS=("00:00:05.200" "00:00:08.900" "00:00:12.600")
+START_OFFSETS=(2100 5800 9400)
+END_OFFSETS=(5200 8900 12600)
  
 for i in 0 1 2; do
   SEQ=$((i + 1))
-  TRANSCRIPT_ID=$(powershell -NoProfile -Command "[guid]::NewGuid().ToString()")
+  TRANSCRIPT_ID=$(uuid_gen)
   echo "=== Sending transcript chunk #$SEQ ==="
   curl -s -X POST "$WEBHOOK_URL" \
     -H "Content-Type: application/json" \
@@ -101,4 +103,4 @@ curl -s -X POST "$WEBHOOK_URL" \
 echo ""
  
 echo "=== Simulation complete ==="
-echo "Verify: GET $BASE_URL/api/meetings/$MEETING_ID"
+echo "Verify: GET $BASE_URL/api/meetings/$MEETING_ID/sessions/$SESSION_ID/transcripts"

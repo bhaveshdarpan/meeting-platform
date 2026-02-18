@@ -5,6 +5,8 @@
 BASE_URL="${1:-http://localhost:8080}"
 WEBHOOK_URL="$BASE_URL/api/webhooks"
 
+uuid_gen() { uuidgen 2>/dev/null || powershell -NoProfile -Command "[guid]::NewGuid().ToString()"; }
+
 MEETING_ID="50c8940e-1b97-402a-97d6-2708b7feca41"
 SESSION_ID="05e57591-d89e-45c9-ae44-08dc1eaad0e0"
 ORGANIZER_ID="70c5d391-5bca-4cf3-9907-bec205798adb"
@@ -58,6 +60,7 @@ function send_transcript() {
   TRANSCRIPT_ID=$1
   SEQ=$2
   CONTENT=$3
+  SESS=${4:-$SESSION_ID}
 
 curl -s -X POST "$WEBHOOK_URL" \
   -H "Content-Type: application/json" \
@@ -65,7 +68,7 @@ curl -s -X POST "$WEBHOOK_URL" \
   \"event\": \"meeting.transcript\",
   \"meeting\": {
     \"id\": \"$MEETING_ID\",
-    \"sessionId\": \"$SESSION_ID\"
+    \"sessionId\": \"$SESS\"
   },
   \"data\": {
     \"transcriptId\": \"$TRANSCRIPT_ID\",
@@ -75,8 +78,8 @@ curl -s -X POST "$WEBHOOK_URL" \
       \"name\": \"Alice Johnson\"
     },
     \"content\": \"$CONTENT\",
-    \"startOffset\": \"00:00:01.000\",
-    \"endOffset\": \"00:00:02.000\",
+    \"startOffset\": \"60\",
+    \"endOffset\": \"120\",
     \"language\": \"en\"
   }
 }"
@@ -87,7 +90,7 @@ echo ""
 echo "===== SCENARIO 1: Duplicate Transcript Chunk ====="
 ############################################################
 send_started
-TID=$(uuidgen)
+TID=$(uuid_gen)
 send_transcript "$TID" 1 "Duplicate test"
 echo "Sending duplicate..."
 send_transcript "$TID" 1 "Duplicate test"
@@ -98,9 +101,9 @@ sleep 2
 echo "===== SCENARIO 2: Out-of-Order Transcript Delivery ====="
 ############################################################
 send_started
-send_transcript "$(uuidgen)" 3 "Third message"
-send_transcript "$(uuidgen)" 1 "First message"
-send_transcript "$(uuidgen)" 2 "Second message"
+send_transcript "$(uuid_gen)" 3 "Third message"
+send_transcript "$(uuid_gen)" 1 "First message"
+send_transcript "$(uuid_gen)" 2 "Second message"
 send_ended
 sleep 2
 
@@ -108,10 +111,10 @@ sleep 2
 echo "===== SCENARIO 3: Transcript After meeting.ended ====="
 ############################################################
 send_started
-send_transcript "$(uuidgen)" 1 "Before ending"
+send_transcript "$(uuid_gen)" 1 "Before ending"
 send_ended
-echo "Sending transcript AFTER meeting ended..."
-send_transcript "$(uuidgen)" 2 "Should be rejected or ignored"
+echo "Sending transcript AFTER meeting ended (late delivery - should be accepted)..."
+send_transcript "$(uuid_gen)" 2 "Late transcript - saved even after session ended"
 sleep 2
 
 ############################################################
@@ -122,8 +125,8 @@ curl -s -X POST "$WEBHOOK_URL" \
   -d "{
   \"event\": \"meeting.ended\",
   \"meeting\": {
-    \"id\": \"$(uuidgen)\",
-    \"sessionId\": \"$(uuidgen)\",
+    \"id\": \"$(uuid_gen)\",
+    \"sessionId\": \"$(uuid_gen)\",
     \"title\": \"Ghost meeting\",
     \"status\": \"LIVE\",
     \"createdAt\": \"2024-12-13T06:57:09.736Z\",
@@ -142,8 +145,8 @@ sleep 2
 ############################################################
 echo "===== SCENARIO 5: Concurrent Sessions For Same Meeting ====="
 ############################################################
-SESSION_A=$(uuidgen)
-SESSION_B=$(uuidgen)
+SESSION_A=$(uuid_gen)
+SESSION_B=$(uuid_gen)
 
 for SESSION in $SESSION_A $SESSION_B; do
 curl -s -X POST "$WEBHOOK_URL" \
@@ -166,7 +169,35 @@ curl -s -X POST "$WEBHOOK_URL" \
 }"
 done
 
-echo "Both sessions started simultaneously."
+echo "Both sessions started. Sending transcripts to each session..."
+TID_A=$(uuid_gen)
+TID_B=$(uuid_gen)
+send_transcript "$TID_A" 1 "Transcript for Session A" "$SESSION_A"
+send_transcript "$TID_B" 1 "Transcript for Session B" "$SESSION_B"
+
+# End both sessions
+for SESSION in $SESSION_A $SESSION_B; do
+curl -s -X POST "$WEBHOOK_URL" \
+  -H "Content-Type: application/json" \
+  -d "{
+  \"event\": \"meeting.ended\",
+  \"meeting\": {
+    \"id\": \"$MEETING_ID\",
+    \"sessionId\": \"$SESSION\",
+    \"title\": \"Concurrent Session\",
+    \"status\": \"LIVE\",
+    \"createdAt\": \"2024-12-13T06:57:09.736Z\",
+    \"startedAt\": \"2024-12-13T06:57:09.736Z\",
+    \"endedAt\": \"2024-12-13T07:04:37.052Z\",
+    \"organizedBy\": {
+      \"id\": \"$ORGANIZER_ID\",
+      \"name\": \"Alice Johnson\"
+    }
+  },
+  \"reason\": \"HOST_ENDED_MEETING\"
+}"
+done
+echo "Concurrent sessions scenario complete."
 sleep 2
 
 ############################################################
@@ -192,11 +223,11 @@ echo ""
 sleep 2
 
 ############################################################
-echo "===== SCENARIO 8: Large Transcript Payload ====="
+echo "===== SCENARIO 8: Large Transcript Payload (~50KB) ====="
 ############################################################
-LARGE_CONTENT=$(printf 'A%.0s' {1..10000})
+LARGE_CONTENT=$(printf 'A%.0s' {1..50000})
 send_started
-send_transcript "$(uuidgen)" 1 "$LARGE_CONTENT"
+send_transcript "$(uuid_gen)" 1 "$LARGE_CONTENT"
 send_ended
 
 echo "===== Edge Case Simulation Complete ====="

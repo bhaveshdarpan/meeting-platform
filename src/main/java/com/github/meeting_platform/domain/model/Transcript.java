@@ -4,11 +4,14 @@ import java.time.Duration;
 import java.util.UUID;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "transcripts")
+@Table(name = "transcripts", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "meetingId", "sessionId", "sequenceNumber" })
+})
 @Getter
 @NoArgsConstructor
 public class Transcript {
@@ -16,8 +19,13 @@ public class Transcript {
     @Id
     private UUID id;
 
+    @NotNull(message = "Transcript must be associated with a meeting")
     private UUID meetingId;
+
+    @NotNull(message = "Transcript must be associated with a session")
     private UUID sessionId;
+
+    @NotNull(message = "Sequence number cannot be null")
     private Integer sequenceNumber;
 
     @Embedded
@@ -25,13 +33,19 @@ public class Transcript {
             @AttributeOverride(name = "id", column = @Column(name = "speaker_id")),
             @AttributeOverride(name = "name", column = @Column(name = "speaker_name"))
     })
+    @NotNull(message = "Transcript must have a speaker")
     private Speaker speaker;
 
+    @NotNull(message = "Transcript content cannot be null")
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private String language;
 
+    @NotNull(message = "Transcript must have a start offset")
     private Duration startOffset;
+
+    @NotNull(message = "Transcript must have an end offset")
     private Duration endOffset;
 
     public Transcript(UUID id,
