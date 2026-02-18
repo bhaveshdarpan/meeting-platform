@@ -2,10 +2,11 @@ package com.github.meeting_platform.infrastructure.controllers;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+import java.time.Instant;
 import java.util.Map;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
+import com.github.meeting_platform.common.exceptions.InvalidEventException;
 import com.github.meeting_platform.infrastructure.asyncevents.MeetingEventPublisher;
 import com.github.meeting_platform.infrastructure.dto.MeetingEndedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingStartedWebhookRequest;
@@ -47,10 +49,11 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.started");
 
-            MeetingStartedWebhookRequest dto = new MeetingStartedWebhookRequest();
+            MeetingStartedWebhookRequest dto = createValidStartedRequest();
             when(objectMapper.convertValue(payload, MeetingStartedWebhookRequest.class))
                     .thenReturn(dto);
 
@@ -70,10 +73,11 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.transcript");
 
-            MeetingTranscriptWebhookRequest dto = new MeetingTranscriptWebhookRequest();
+            MeetingTranscriptWebhookRequest dto = createValidTranscriptRequest();
 
             when(objectMapper.convertValue(payload,
                     MeetingTranscriptWebhookRequest.class))
@@ -90,10 +94,11 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.ended");
 
-            MeetingEndedWebhookRequest dto = new MeetingEndedWebhookRequest();
+            MeetingEndedWebhookRequest dto = createValidEndedRequest();
 
             when(objectMapper.convertValue(payload,
                     MeetingEndedWebhookRequest.class))
@@ -110,13 +115,12 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("unknown.event");
 
-            ResponseEntity<Map<String, String>> response = controller.handleWebhook(payload);
-
-            assertEquals(202, response.getStatusCode().value());
-            assertEquals("accepted", response.getBody().get("status"));
+            assertThrows(InvalidEventException.class,
+                    () -> controller.handleWebhook(payload));
 
             verifyNoInteractions(eventPublisher);
             verifyNoInteractions(objectMapper);
@@ -125,9 +129,9 @@ class WebhookControllerTest {
         @Test
         void shouldThrowWhenEventMissing() {
             JsonNode payload = mock(JsonNode.class);
-            when(payload.get("event")).thenReturn(null);
+            when(payload.has("event")).thenReturn(false);
 
-            assertThrows(NullPointerException.class,
+            assertThrows(InvalidEventException.class,
                     () -> controller.handleWebhook(payload));
 
             verifyNoInteractions(eventPublisher);
@@ -138,11 +142,11 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.started");
 
-            when(objectMapper.convertValue(any(),
-                    eq(MeetingStartedWebhookRequest.class)))
+            when(objectMapper.convertValue(payload, MeetingStartedWebhookRequest.class))
                     .thenThrow(new RuntimeException("Mapping failed"));
 
             assertThrows(RuntimeException.class,
@@ -156,10 +160,11 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.started");
 
-            MeetingStartedWebhookRequest dto = new MeetingStartedWebhookRequest();
+            MeetingStartedWebhookRequest dto = createValidStartedRequest();
 
             when(objectMapper.convertValue(payload,
                     MeetingStartedWebhookRequest.class))
@@ -177,12 +182,12 @@ class WebhookControllerTest {
             JsonNode payload = mock(JsonNode.class);
             JsonNode eventNode = mock(JsonNode.class);
 
+            when(payload.has("event")).thenReturn(true);
             when(payload.get("event")).thenReturn(eventNode);
             when(eventNode.asString()).thenReturn("meeting.started");
 
-            when(objectMapper.convertValue(any(),
-                    eq(MeetingStartedWebhookRequest.class)))
-                    .thenReturn(new MeetingStartedWebhookRequest());
+            when(objectMapper.convertValue(payload, MeetingStartedWebhookRequest.class))
+                    .thenReturn(createValidStartedRequest());
 
             ResponseEntity<Map<String, String>> response = controller.handleWebhook(payload);
 
@@ -195,6 +200,51 @@ class WebhookControllerTest {
     // ============================================================
     // HEALTH ENDPOINT TESTS
     // ============================================================
+
+    private static MeetingStartedWebhookRequest createValidStartedRequest() {
+        MeetingStartedWebhookRequest dto = new MeetingStartedWebhookRequest();
+        MeetingStartedWebhookRequest.Meeting meeting = new MeetingStartedWebhookRequest.Meeting();
+        meeting.setId(UUID.randomUUID());
+        meeting.setSessionId(UUID.randomUUID());
+        MeetingStartedWebhookRequest.OrganizedBy organizer = new MeetingStartedWebhookRequest.OrganizedBy();
+        organizer.setId(UUID.randomUUID());
+        organizer.setName("Test");
+        meeting.setOrganizedBy(organizer);
+        dto.setMeeting(meeting);
+        return dto;
+    }
+
+    private static MeetingTranscriptWebhookRequest createValidTranscriptRequest() {
+        MeetingTranscriptWebhookRequest dto = new MeetingTranscriptWebhookRequest();
+        MeetingTranscriptWebhookRequest.Meeting meeting = new MeetingTranscriptWebhookRequest.Meeting();
+        meeting.setId(UUID.randomUUID());
+        meeting.setSessionId(UUID.randomUUID());
+        dto.setMeeting(meeting);
+        MeetingTranscriptWebhookRequest.TranscriptData data = new MeetingTranscriptWebhookRequest.TranscriptData();
+        data.setTranscriptId(UUID.randomUUID());
+        data.setStartOffset(2);
+        data.setEndOffset(5);
+        MeetingTranscriptWebhookRequest.Speaker speaker = new MeetingTranscriptWebhookRequest.Speaker();
+        speaker.setId(UUID.randomUUID());
+        speaker.setName("Speaker");
+        data.setSpeaker(speaker);
+        dto.setData(data);
+        return dto;
+    }
+
+    private static MeetingEndedWebhookRequest createValidEndedRequest() {
+        MeetingEndedWebhookRequest dto = new MeetingEndedWebhookRequest();
+        MeetingEndedWebhookRequest.Meeting meeting = new MeetingEndedWebhookRequest.Meeting();
+        meeting.setId(UUID.randomUUID());
+        meeting.setSessionId(UUID.randomUUID());
+        meeting.setEndedAt(Instant.now());
+        MeetingEndedWebhookRequest.OrganizedBy organizer = new MeetingEndedWebhookRequest.OrganizedBy();
+        organizer.setId(UUID.randomUUID());
+        organizer.setName("Test");
+        meeting.setOrganizedBy(organizer);
+        dto.setMeeting(meeting);
+        return dto;
+    }
 
     @Test
     void healthShouldReturnUpStatus() {

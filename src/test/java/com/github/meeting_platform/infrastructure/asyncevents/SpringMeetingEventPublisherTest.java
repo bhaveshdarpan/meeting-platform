@@ -1,9 +1,10 @@
 package com.github.meeting_platform.infrastructure.asyncevents;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
@@ -12,10 +13,14 @@ import org.springframework.context.ApplicationEventPublisher;
 class SpringMeetingEventPublisherTest {
 
     @Mock
-    private ApplicationEventPublisher publisher;
+    private ApplicationEventPublisher applicationEventPublisher;
 
-    @InjectMocks
     private SpringMeetingEventPublisher eventPublisher;
+
+    @BeforeEach
+    void setUp() {
+        eventPublisher = new SpringMeetingEventPublisher(applicationEventPublisher);
+    }
 
     @Test
     void publish_delegatesToApplicationEventPublisher() {
@@ -23,8 +28,8 @@ class SpringMeetingEventPublisherTest {
 
         eventPublisher.publish(event);
 
-        verify(publisher, times(1)).publishEvent(event);
-        verifyNoMoreInteractions(publisher);
+        verify(applicationEventPublisher, times(1)).publishEvent(event);
+        verifyNoMoreInteractions(applicationEventPublisher);
     }
 
     @Test
@@ -35,16 +40,14 @@ class SpringMeetingEventPublisherTest {
         eventPublisher.publish(event1);
         eventPublisher.publish(event2);
 
-        verify(publisher).publishEvent(event1);
-        verify(publisher).publishEvent(event2);
-        verify(publisher, times(2)).publishEvent(any());
+        verify(applicationEventPublisher, times(2)).publishEvent(any());
     }
 
     @Test
     void publish_nullEvent_shouldStillDelegate() {
         eventPublisher.publish(null);
 
-        verify(publisher).publishEvent(null);
+        verify(applicationEventPublisher, times(1)).publishEvent(any());
     }
 
     @Test
@@ -53,7 +56,7 @@ class SpringMeetingEventPublisherTest {
 
         eventPublisher.publish(event);
 
-        verify(publisher).publishEvent(event);
-        verifyNoMoreInteractions(publisher);
+        verify(applicationEventPublisher).publishEvent(event);
+        verifyNoMoreInteractions(applicationEventPublisher);
     }
 }

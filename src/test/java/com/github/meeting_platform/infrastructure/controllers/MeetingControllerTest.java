@@ -3,6 +3,7 @@ package com.github.meeting_platform.infrastructure.controllers;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +55,9 @@ class MeetingControllerTest {
 
     @Test
     void getSessionTranscript_returnsSingleTranscript() {
-        Transcript transcript = new Transcript();
+        Transcript transcript = new Transcript(UUID.randomUUID(), meetingId, sessionId, 1,
+                UUID.randomUUID(), "Speaker", "Test content", "en",
+                Duration.ZERO, Duration.ofSeconds(5));
         when(meetingService.getSessionTranscripts(meetingId, sessionId))
                 .thenReturn(List.of(transcript));
 
@@ -71,8 +74,12 @@ class MeetingControllerTest {
 
     @Test
     void getSessionTranscript_returnsMultipleTranscripts() {
-        Transcript t1 = new Transcript();
-        Transcript t2 = new Transcript();
+        Transcript t1 = new Transcript(UUID.randomUUID(), meetingId, sessionId, 1,
+                UUID.randomUUID(), "Speaker1", "Content1", "en",
+                Duration.ZERO, Duration.ofSeconds(5));
+        Transcript t2 = new Transcript(UUID.randomUUID(), meetingId, sessionId, 2,
+                UUID.randomUUID(), "Speaker2", "Content2", "en",
+                Duration.ofSeconds(5), Duration.ofSeconds(10));
 
         when(meetingService.getSessionTranscripts(meetingId, sessionId))
                 .thenReturn(List.of(t1, t2));

@@ -1,7 +1,7 @@
 package com.github.meeting_platform.application.eventhandler;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import java.time.Duration;
@@ -11,6 +11,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,6 +20,9 @@ import com.github.meeting_platform.application.events.MeetingEndedEvent;
 import com.github.meeting_platform.application.events.MeetingStartedEvent;
 import com.github.meeting_platform.application.events.TranscriptAddedEvent;
 import com.github.meeting_platform.domain.service.MeetingService;
+import com.github.meeting_platform.domain.service.command.AddTranscriptCommand;
+import com.github.meeting_platform.domain.service.command.EndMeetingCommand;
+import com.github.meeting_platform.domain.service.command.StartMeetingCommand;
 
 @ExtendWith(MockitoExtension.class)
 class MeetingEventHandlerTest {
@@ -37,11 +41,10 @@ class MeetingEventHandlerTest {
     class MeetingStartedTests {
 
         @Test
-        void shouldCallStartMeetingWithCorrectArguments() {
+        void shouldCallStartMeetingWithCorrectCommand() {
             UUID meetingId = UUID.randomUUID();
             UUID sessionId = UUID.randomUUID();
             UUID organizer = UUID.randomUUID();
-
             Instant started = Instant.now();
             Instant created = Instant.now();
 
@@ -51,22 +54,25 @@ class MeetingEventHandlerTest {
                     "title",
                     "room",
                     "source",
-                    started,
                     created,
+                    started,
                     organizer,
                     "org");
 
             handler.handle(event);
 
-            verify(meetingService).startMeeting(
-                    eq(meetingId),
-                    eq(sessionId),
-                    eq("title"),
-                    eq("room"),
-                    eq(organizer),
-                    eq("org"),
-                    anyString(),
-                    anyString());
+            ArgumentCaptor<StartMeetingCommand> captor = ArgumentCaptor.forClass(StartMeetingCommand.class);
+            verify(meetingService).startMeeting(captor.capture());
+
+            StartMeetingCommand cmd = captor.getValue();
+            assertEquals(meetingId, cmd.getMeetingId());
+            assertEquals(sessionId, cmd.getSessionId());
+            assertEquals("title", cmd.getTitle());
+            assertEquals("room", cmd.getRoomName());
+            assertEquals(organizer, cmd.getOrganizedById());
+            assertEquals("org", cmd.getOrganizedByName());
+            assertEquals(created, cmd.getCreatedAt());
+            assertEquals(started, cmd.getStartedAt());
         }
 
         @Test
@@ -88,14 +94,11 @@ class MeetingEventHandlerTest {
             handler.handle(event);
             handler.handle(event);
 
-            verify(meetingService, times(2))
-                    .startMeeting(eq(meetingId), eq(sessionId),
-                            any(), any(), any(), any(),
-                            anyString(), anyString());
+            verify(meetingService, times(2)).startMeeting(any(StartMeetingCommand.class));
         }
 
         @Test
-        void shouldSwallowExceptionFromService() {
+        void shouldPropagateExceptionFromService() {
             MeetingStartedEvent event = new MeetingStartedEvent(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
@@ -109,10 +112,9 @@ class MeetingEventHandlerTest {
 
             doThrow(new RuntimeException("DB error"))
                     .when(meetingService)
-                    .startMeeting(any(), any(), any(), any(),
-                            any(), any(), anyString(), anyString());
+                    .startMeeting(any(StartMeetingCommand.class));
 
-            assertDoesNotThrow(() -> handler.handle(event));
+            assertThrows(RuntimeException.class, () -> handler.handle(event));
         }
     }
 
@@ -124,7 +126,7 @@ class MeetingEventHandlerTest {
     class TranscriptAddedTests {
 
         @Test
-        void shouldCallAddTranscriptWithCorrectArguments() {
+        void shouldCallAddTranscriptWithCorrectCommand() {
             UUID transcriptId = UUID.randomUUID();
             UUID meetingId = UUID.randomUUID();
             UUID sessionId = UUID.randomUUID();
@@ -144,17 +146,20 @@ class MeetingEventHandlerTest {
 
             handler.handle(event);
 
-            verify(meetingService).addTranscript(
-                    eq(meetingId),
-                    eq(sessionId),
-                    eq(transcriptId),
-                    eq(5),
-                    eq(speakerId),
-                    eq("Alice"),
-                    eq("Hello world"),
-                    eq(Duration.ofSeconds(1)),
-                    eq(Duration.ofSeconds(3)),
-                    eq("en"));
+            ArgumentCaptor<AddTranscriptCommand> captor = ArgumentCaptor.forClass(AddTranscriptCommand.class);
+            verify(meetingService).addTranscript(captor.capture());
+
+            AddTranscriptCommand cmd = captor.getValue();
+            assertEquals(meetingId, cmd.getMeetingId());
+            assertEquals(sessionId, cmd.getSessionId());
+            assertEquals(transcriptId, cmd.getTranscriptId());
+            assertEquals(5, cmd.getSequenceNumber());
+            assertEquals(speakerId, cmd.getSpeakerId());
+            assertEquals("Alice", cmd.getSpeakerName());
+            assertEquals("Hello world", cmd.getContent());
+            assertEquals(Duration.ofSeconds(1), cmd.getStartOffset());
+            assertEquals(Duration.ofSeconds(3), cmd.getEndOffset());
+            assertEquals("en", cmd.getLanguage());
         }
 
         @Test
@@ -173,14 +178,13 @@ class MeetingEventHandlerTest {
 
             handler.handle(event);
 
-            verify(meetingService).addTranscript(
-                    any(), any(), any(), anyInt(),
-                    any(), isNull(),
-                    any(), any(), any(), any());
+            ArgumentCaptor<AddTranscriptCommand> captor = ArgumentCaptor.forClass(AddTranscriptCommand.class);
+            verify(meetingService).addTranscript(captor.capture());
+            assertNull(captor.getValue().getSpeakerName());
         }
 
         @Test
-        void shouldSwallowExceptionFromService() {
+        void shouldPropagateExceptionFromService() {
             TranscriptAddedEvent event = new TranscriptAddedEvent(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
@@ -195,11 +199,9 @@ class MeetingEventHandlerTest {
 
             doThrow(new RuntimeException("DB error"))
                     .when(meetingService)
-                    .addTranscript(any(), any(), any(),
-                            anyInt(), any(), any(),
-                            any(), any(), any(), any());
+                    .addTranscript(any(AddTranscriptCommand.class));
 
-            assertDoesNotThrow(() -> handler.handle(event));
+            assertThrows(RuntimeException.class, () -> handler.handle(event));
         }
     }
 
@@ -211,7 +213,7 @@ class MeetingEventHandlerTest {
     class MeetingEndedTests {
 
         @Test
-        void shouldCallEndMeetingWithCorrectArguments() {
+        void shouldCallEndMeetingWithCorrectCommand() {
             UUID meetingId = UUID.randomUUID();
             UUID sessionId = UUID.randomUUID();
             Instant endedAt = Instant.now();
@@ -230,12 +232,14 @@ class MeetingEventHandlerTest {
 
             handler.handle(event);
 
-            verify(meetingService)
-                    .endMeeting(
-                            eq(meetingId),
-                            eq(sessionId),
-                            eq(endedAt),
-                            eq("reason"));
+            ArgumentCaptor<EndMeetingCommand> captor = ArgumentCaptor.forClass(EndMeetingCommand.class);
+            verify(meetingService).endMeeting(captor.capture());
+
+            EndMeetingCommand cmd = captor.getValue();
+            assertEquals(meetingId, cmd.getMeetingId());
+            assertEquals(sessionId, cmd.getSessionId());
+            assertEquals(endedAt, cmd.getEndedAt());
+            assertEquals("reason", cmd.getReason());
         }
 
         @Test
@@ -254,12 +258,13 @@ class MeetingEventHandlerTest {
 
             handler.handle(event);
 
-            verify(meetingService)
-                    .endMeeting(any(), any(), any(), isNull());
+            ArgumentCaptor<EndMeetingCommand> captor = ArgumentCaptor.forClass(EndMeetingCommand.class);
+            verify(meetingService).endMeeting(captor.capture());
+            assertNull(captor.getValue().getReason());
         }
 
         @Test
-        void shouldSwallowExceptionFromService() {
+        void shouldPropagateExceptionFromService() {
             MeetingEndedEvent event = new MeetingEndedEvent(
                     UUID.randomUUID(),
                     UUID.randomUUID(),
@@ -274,19 +279,9 @@ class MeetingEventHandlerTest {
 
             doThrow(new RuntimeException("DB error"))
                     .when(meetingService)
-                    .endMeeting(any(), any(), any(), any());
+                    .endMeeting(any(EndMeetingCommand.class));
 
-            assertDoesNotThrow(() -> handler.handle(event));
+            assertThrows(RuntimeException.class, () -> handler.handle(event));
         }
     }
-
-    // ============================================================
-    // SAFETY TESTS
-    // ============================================================
-
-    // @Test
-    // void shouldNotInteractWithServiceWhenNullEvent() {
-    // assertDoesNotThrow(() -> handler.handle(null));
-    // verifyNoInteractions(meetingService);
-    // }
 }
