@@ -13,6 +13,7 @@ public class SpringMeetingEventPublisher implements MeetingEventPublisher {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
+    // @Retryable(includes = DataAccessException.class, multiplier = 2.0)
     public void publish(Object event) {
         log.info("Publishing event: {}", event);
         applicationEventPublisher.publishEvent(event);
