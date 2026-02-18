@@ -3,6 +3,7 @@ package com.github.meeting_platform.infrastructure.controllers;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,7 +32,9 @@ public class WebhookController {
     private final ObjectMapper objectMapper;
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> handleWebhook(@Valid @RequestBody JsonNode payload) {
+    public ResponseEntity<Map<String, String>> handleWebhook(@Valid @RequestBody JsonNode payload)
+            throws InvalidEventException, InvalidFormatException, MismatchedInputException,
+            MethodArgumentNotValidException {
         log.info("Processing webhook event: {}", payload);
 
         // Validate event field exists
@@ -77,6 +80,9 @@ public class WebhookController {
         } catch (MismatchedInputException e) {
             log.error("Mismatched input in webhook payload: {}", e.getMessage());
             throw new InvalidEventException("Invalid webhook payload structure: " + e.getMessage());
+        } catch (MethodArgumentNotValidException e) {
+            log.error("Validation error in webhook payload: {}", e.getMessage());
+            throw new InvalidEventException("Validation error in webhook payload: " + e.getMessage());
         }
 
         return ResponseEntity.accepted().body(Map.of("status", "accepted"));

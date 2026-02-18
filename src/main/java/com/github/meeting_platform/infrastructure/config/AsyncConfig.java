@@ -1,4 +1,4 @@
-package com.github.meeting_platform.config;
+package com.github.meeting_platform.infrastructure.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

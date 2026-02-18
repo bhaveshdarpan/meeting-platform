@@ -37,7 +37,7 @@ class MeetingControllerTest {
     }
 
     @Test
-    void getSessionTranscript_returnsEmptyList() {
+    void getSessionTranscript_returnsEmptyList() throws Exception {
         when(meetingService.getSessionTranscripts(meetingId, sessionId))
                 .thenReturn(List.of());
 
@@ -54,7 +54,7 @@ class MeetingControllerTest {
     }
 
     @Test
-    void getSessionTranscript_returnsSingleTranscript() {
+    void getSessionTranscript_returnsSingleTranscript() throws Exception {
         Transcript transcript = new Transcript(UUID.randomUUID(), meetingId, sessionId, 1,
                 UUID.randomUUID(), "Speaker", "Test content", "en",
                 Duration.ZERO, Duration.ofSeconds(5));
@@ -73,7 +73,7 @@ class MeetingControllerTest {
     }
 
     @Test
-    void getSessionTranscript_returnsMultipleTranscripts() {
+    void getSessionTranscript_returnsMultipleTranscripts() throws Exception {
         Transcript t1 = new Transcript(UUID.randomUUID(), meetingId, sessionId, 1,
                 UUID.randomUUID(), "Speaker1", "Content1", "en",
                 Duration.ZERO, Duration.ofSeconds(5));

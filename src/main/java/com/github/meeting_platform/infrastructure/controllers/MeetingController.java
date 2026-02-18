@@ -26,11 +26,16 @@ public class MeetingController {
 
     @GetMapping("/{id}/sessions/{sessionId}/transcript")
     public ResponseEntity<List<Transcript>> getSessionTranscript(@PathVariable("id") String meetingId,
-            @PathVariable("sessionId") String sessionId) {
+            @PathVariable("sessionId") String sessionId) throws Exception {
         log.info("Received request to get transcript for meetingId: {}, sessionId: {}", meetingId, sessionId);
         // fetch transcripts for the given meeting and session
-        List<Transcript> transcripts = meetingService.getSessionTranscripts(UUID.fromString(meetingId),
-                UUID.fromString(sessionId));
+        List<Transcript> transcripts;
+        try {
+            transcripts = meetingService.getSessionTranscripts(UUID.fromString(meetingId),
+                    UUID.fromString(sessionId));
+        } catch (Exception e) {
+            throw e;
+        }
         return ResponseEntity.ok(transcripts);
     }
 }

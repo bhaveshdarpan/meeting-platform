@@ -9,13 +9,13 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.github.meeting_platform.application.events.MeetingStartedEvent;
-import com.github.meeting_platform.application.events.TranscriptAddedEvent;
 import com.github.meeting_platform.infrastructure.dto.MeetingEndedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingStartedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingTranscriptWebhookRequest;
-import com.github.meeting_platform.application.events.MeetingEndedEvent;
 import com.github.meeting_platform.application.eventhandler.MeetingEventHandler;
+import com.github.meeting_platform.application.events.MeetingEndedEvent;
+import com.github.meeting_platform.application.events.MeetingStartedEvent;
+import com.github.meeting_platform.application.events.TranscriptAddedEvent;
 
 @Component
 @RequiredArgsConstructor

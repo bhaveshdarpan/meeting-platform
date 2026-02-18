@@ -13,11 +13,7 @@ import com.github.meeting_platform.domain.service.command.StartMeetingCommand;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Handles application events and delegates to the domain service.
- * Uses template method for consistent error handling (DRY, Single
- * Responsibility).
- */
+
 @Component
 @RequiredArgsConstructor
 @Slf4j
