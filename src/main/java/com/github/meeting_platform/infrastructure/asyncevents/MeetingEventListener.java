@@ -51,7 +51,6 @@ public class MeetingEventListener {
             log.error("Error processing MeetingStartedWebhookRequest: meetingId={}, error={}",
                     request.getMeeting() != null ? request.getMeeting().getId() : null,
                     e.getMessage(), e);
-            // Don't rethrow - let the event system continue processing other events
         }
     }
 
@@ -93,7 +92,6 @@ public class MeetingEventListener {
             log.error("Error processing MeetingTranscriptWebhookRequest: transcriptId={}, error={}",
                     request.getData() != null ? request.getData().getTranscriptId() : null,
                     e.getMessage(), e);
-            // Don't rethrow - let the event system continue processing other events
         }
     }
 
@@ -127,7 +125,6 @@ public class MeetingEventListener {
             log.error("Error processing MeetingEndedWebhookRequest: meetingId={}, error={}",
                     request.getMeeting() != null ? request.getMeeting().getId() : null,
                     e.getMessage(), e);
-            // Don't rethrow - let the event system continue processing other events
         }
     }
 }

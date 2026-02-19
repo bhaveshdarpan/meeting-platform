@@ -13,10 +13,6 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 
-/**
- * Global exception handler for REST controllers.
- * Provides consistent error responses across the application.
- */
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {

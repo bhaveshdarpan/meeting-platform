@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Standard error response DTO for API error responses.
- */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
