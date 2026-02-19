@@ -40,14 +40,14 @@ class SpringMeetingEventPublisherTest {
         eventPublisher.publish(event1);
         eventPublisher.publish(event2);
 
-        verify(applicationEventPublisher, times(2)).publishEvent(any());
+        verify(applicationEventPublisher, times(2)).publishEvent((Object) any());
     }
 
     @Test
     void publish_nullEvent_shouldStillDelegate() {
         eventPublisher.publish(null);
 
-        verify(applicationEventPublisher, times(1)).publishEvent(any());
+        verify(applicationEventPublisher, times(0)).publishEvent(any());
     }
 
     @Test

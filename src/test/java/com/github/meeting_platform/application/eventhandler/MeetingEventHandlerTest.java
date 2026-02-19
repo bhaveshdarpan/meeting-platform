@@ -16,10 +16,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.github.meeting_platform.domain.eventhandler.MeetingEventHandler;
 import com.github.meeting_platform.domain.events.MeetingEndedEvent;
 import com.github.meeting_platform.domain.events.MeetingStartedEvent;
 import com.github.meeting_platform.domain.events.TranscriptAddedEvent;
+import com.github.meeting_platform.domain.handler.MeetingEventHandler;
 import com.github.meeting_platform.domain.service.MeetingService;
 import com.github.meeting_platform.domain.service.command.AddTranscriptCommand;
 import com.github.meeting_platform.domain.service.command.EndMeetingCommand;

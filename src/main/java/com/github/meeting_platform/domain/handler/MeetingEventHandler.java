@@ -1,4 +1,4 @@
-package com.github.meeting_platform.domain.eventhandler;
+package com.github.meeting_platform.domain.handler;
 
 import org.springframework.stereotype.Component;
 
