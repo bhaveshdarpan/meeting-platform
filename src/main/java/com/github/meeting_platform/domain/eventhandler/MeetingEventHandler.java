@@ -1,10 +1,10 @@
-package com.github.meeting_platform.application.eventhandler;
+package com.github.meeting_platform.domain.eventhandler;
 
 import org.springframework.stereotype.Component;
 
-import com.github.meeting_platform.application.events.MeetingEndedEvent;
-import com.github.meeting_platform.application.events.MeetingStartedEvent;
-import com.github.meeting_platform.application.events.TranscriptAddedEvent;
+import com.github.meeting_platform.domain.events.MeetingEndedEvent;
+import com.github.meeting_platform.domain.events.MeetingStartedEvent;
+import com.github.meeting_platform.domain.events.TranscriptAddedEvent;
 import com.github.meeting_platform.domain.service.MeetingService;
 import com.github.meeting_platform.domain.service.command.AddTranscriptCommand;
 import com.github.meeting_platform.domain.service.command.EndMeetingCommand;

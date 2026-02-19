@@ -1,4 +1,4 @@
-package com.github.meeting_platform.application.events;
+package com.github.meeting_platform.domain.events;
 
 import java.time.Duration;
 import java.util.UUID;

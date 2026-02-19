@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 import com.github.meeting_platform.infrastructure.dto.MeetingEndedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingStartedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingTranscriptWebhookRequest;
-import com.github.meeting_platform.application.eventhandler.MeetingEventHandler;
-import com.github.meeting_platform.application.events.MeetingEndedEvent;
-import com.github.meeting_platform.application.events.MeetingStartedEvent;
-import com.github.meeting_platform.application.events.TranscriptAddedEvent;
+import com.github.meeting_platform.domain.eventhandler.MeetingEventHandler;
+import com.github.meeting_platform.domain.events.MeetingEndedEvent;
+import com.github.meeting_platform.domain.events.MeetingStartedEvent;
+import com.github.meeting_platform.domain.events.TranscriptAddedEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -27,15 +27,15 @@ public class MeetingEventListener {
     @EventListener
     public void on(MeetingStartedWebhookRequest request) {
         try {
-            log.info("Received MeetingStartedWebhookRequest: meetingId={}, sessionId={}", 
+            log.info("Received MeetingStartedWebhookRequest: meetingId={}, sessionId={}",
                     request.getMeeting() != null ? request.getMeeting().getId() : null,
                     request.getMeeting() != null ? request.getMeeting().getSessionId() : null);
-            
+
             if (request.getMeeting() == null) {
                 log.error("Invalid MeetingStartedWebhookRequest: meeting is null");
                 return;
             }
-            
+
             MeetingStartedEvent event = new MeetingStartedEvent(
                     request.getMeeting().getId(),
                     request.getMeeting().getSessionId(),
@@ -48,8 +48,8 @@ public class MeetingEventListener {
                     request.getMeeting().getOrganizedBy().getName());
             eventHandler.handle(event);
         } catch (Exception e) {
-            log.error("Error processing MeetingStartedWebhookRequest: meetingId={}, error={}", 
-                    request.getMeeting() != null ? request.getMeeting().getId() : null, 
+            log.error("Error processing MeetingStartedWebhookRequest: meetingId={}, error={}",
+                    request.getMeeting() != null ? request.getMeeting().getId() : null,
                     e.getMessage(), e);
             // Don't rethrow - let the event system continue processing other events
         }
@@ -59,16 +59,16 @@ public class MeetingEventListener {
     @EventListener
     public void on(MeetingTranscriptWebhookRequest request) {
         try {
-            log.info("Received MeetingTranscriptWebhookRequest: transcriptId={}, meetingId={}, sessionId={}", 
+            log.info("Received MeetingTranscriptWebhookRequest: transcriptId={}, meetingId={}, sessionId={}",
                     request.getData() != null ? request.getData().getTranscriptId() : null,
                     request.getMeeting() != null ? request.getMeeting().getId() : null,
                     request.getMeeting() != null ? request.getMeeting().getSessionId() : null);
-            
+
             if (request.getMeeting() == null || request.getData() == null) {
                 log.error("Invalid MeetingTranscriptWebhookRequest: meeting or data is null");
                 return;
             }
-            
+
             Duration startOffset = Duration.ofSeconds(request.getData().getStartOffset());
             Duration endOffset = Duration.ofSeconds(request.getData().getEndOffset());
             TranscriptAddedEvent event = new TranscriptAddedEvent(
@@ -85,13 +85,13 @@ public class MeetingEventListener {
 
             eventHandler.handle(event);
         } catch (IllegalArgumentException e) {
-            log.error("Invalid input in MeetingTranscriptWebhookRequest: transcriptId={}, error={}", 
-                    request.getData() != null ? request.getData().getTranscriptId() : null, 
+            log.error("Invalid input in MeetingTranscriptWebhookRequest: transcriptId={}, error={}",
+                    request.getData() != null ? request.getData().getTranscriptId() : null,
                     e.getMessage(), e);
             // Don't rethrow - validation errors are non-retryable
         } catch (Exception e) {
-            log.error("Error processing MeetingTranscriptWebhookRequest: transcriptId={}, error={}", 
-                    request.getData() != null ? request.getData().getTranscriptId() : null, 
+            log.error("Error processing MeetingTranscriptWebhookRequest: transcriptId={}, error={}",
+                    request.getData() != null ? request.getData().getTranscriptId() : null,
                     e.getMessage(), e);
             // Don't rethrow - let the event system continue processing other events
         }
@@ -101,15 +101,15 @@ public class MeetingEventListener {
     @EventListener
     public void on(MeetingEndedWebhookRequest request) {
         try {
-            log.info("Received MeetingEndedWebhookRequest: meetingId={}, sessionId={}", 
+            log.info("Received MeetingEndedWebhookRequest: meetingId={}, sessionId={}",
                     request.getMeeting() != null ? request.getMeeting().getId() : null,
                     request.getMeeting() != null ? request.getMeeting().getSessionId() : null);
-            
+
             if (request.getMeeting() == null) {
                 log.error("Invalid MeetingEndedWebhookRequest: meeting is null");
                 return;
             }
-            
+
             MeetingEndedEvent event = new MeetingEndedEvent(
                     request.getMeeting().getId(),
                     request.getMeeting().getSessionId(),
@@ -124,8 +124,8 @@ public class MeetingEventListener {
                     request.getReason());
             eventHandler.handle(event);
         } catch (Exception e) {
-            log.error("Error processing MeetingEndedWebhookRequest: meetingId={}, error={}", 
-                    request.getMeeting() != null ? request.getMeeting().getId() : null, 
+            log.error("Error processing MeetingEndedWebhookRequest: meetingId={}, error={}",
+                    request.getMeeting() != null ? request.getMeeting().getId() : null,
                     e.getMessage(), e);
             // Don't rethrow - let the event system continue processing other events
         }
