@@ -1,4 +1,6 @@
-package com.github.meeting_platform.domain.handler;
+package com.github.meeting_platform.application.handler;
+
+import java.util.function.Supplier;
 
 import org.springframework.stereotype.Component;
 
@@ -12,7 +14,6 @@ import com.github.meeting_platform.domain.service.command.StartMeetingCommand;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 
 @Component
 @RequiredArgsConstructor
@@ -71,8 +72,7 @@ public class MeetingEventHandler {
          * Non-retryable exceptions (IllegalArgumentException, domain exceptions) are
          * rethrown.
          */
-        private void executeWithLogging(String eventName, java.util.function.Supplier<String> contextSupplier,
-                        Runnable action) {
+        private void executeWithLogging(String eventName, Supplier<String> contextSupplier, Runnable action) {
                 String context = contextSupplier.get();
                 try {
                         log.info("Handling {}: {}", eventName, context);

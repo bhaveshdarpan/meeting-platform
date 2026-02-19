@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationContext;
 
-import com.github.meeting_platform.domain.handler.MeetingEventHandler;
+import com.github.meeting_platform.application.handler.MeetingEventHandler;
 import com.github.meeting_platform.domain.service.MeetingService;
 import com.github.meeting_platform.infrastructure.controllers.MeetingController;
 
