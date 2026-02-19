@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.github.meeting_platform.infrastructure.dto.MeetingEndedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingStartedWebhookRequest;
 import com.github.meeting_platform.infrastructure.dto.MeetingTranscriptWebhookRequest;
-import com.github.meeting_platform.application.handler.MeetingEventHandler;
+import com.github.meeting_platform.application.eventhandler.MeetingEventHandler;
 import com.github.meeting_platform.domain.events.MeetingEndedEvent;
 import com.github.meeting_platform.domain.events.MeetingStartedEvent;
 import com.github.meeting_platform.domain.events.TranscriptAddedEvent;

@@ -1,4 +1,4 @@
-package com.github.meeting_platform.application.handler;
+package com.github.meeting_platform.application.eventhandler;
 
 import java.util.function.Supplier;
 
