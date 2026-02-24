@@ -2,6 +2,7 @@ package com.github.meeting_platform.common.exceptions;
 
 import java.util.stream.Collectors;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -124,9 +125,9 @@ public class GlobalExceptionHandler {
                 return ResponseEntity.badRequest().body(error);
         }
 
-        @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+        @ExceptionHandler(DataIntegrityViolationException.class)
         public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
-                        org.springframework.dao.DataIntegrityViolationException ex, WebRequest request) {
+                        DataIntegrityViolationException ex, WebRequest request) {
                 log.warn("Data integrity violation: {}", ex.getMessage());
                 ErrorResponse error = new ErrorResponse(
                                 HttpStatus.CONFLICT.value(),

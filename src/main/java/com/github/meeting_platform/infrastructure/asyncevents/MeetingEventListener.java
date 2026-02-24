@@ -24,6 +24,7 @@ public class MeetingEventListener {
 
     private final MeetingEventHandler eventHandler;
 
+    @Async
     @EventListener
     public void on(MeetingStartedWebhookRequest request) {
         try {

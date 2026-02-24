@@ -22,6 +22,7 @@ public class MeetingEventHandler {
 
         private final MeetingService meetingService;
 
+        // @Retryable(includes = DataAccessException.class, multiplier = 2.0)
         public void handle(MeetingStartedEvent event) {
                 executeWithLogging(
                                 "MeetingStartedEvent",
@@ -37,6 +38,7 @@ public class MeetingEventHandler {
                                                 event.getStartedAt())));
         }
 
+        // @Retryable(includes = DataAccessException.class, multiplier = 2.0)
         public void handle(TranscriptAddedEvent event) {
                 executeWithLogging(
                                 "TranscriptAddedEvent",
@@ -56,6 +58,7 @@ public class MeetingEventHandler {
                                                 event.getLanguage())));
         }
 
+        // @Retryable(includes = DataAccessException.class, multiplier = 2.0)
         public void handle(MeetingEndedEvent event) {
                 executeWithLogging(
                                 "MeetingEndedEvent",
